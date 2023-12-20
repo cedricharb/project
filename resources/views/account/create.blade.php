@@ -1,47 +1,60 @@
 <x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <!-- Validation Errors -->
+    <x-auth-validation-errors class="mb-4" :errors="$errors" />
 
-    <form method="POST" action="{{ route('login') }}">
+    <!-- Account Creation Form -->
+    <form method="POST" action="{{ route('account.store') }}">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <!-- Account Number -->
+        <div class="mt-4 hidden">
+            <x-input-label for="account_number" :value="__('Account Number')" />
+
+            <x-text-input id="account_number" class="block mt-1 w-full" type="text" name="account_number" :value="old('account_number')" required readonly />
+
+            <x-input-error :messages="$errors->get('account_number')" class="mt-2" />
         </div>
 
-        <!-- Password -->
+        <!-- Currency -->
         <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+            <x-input-label for="currency" :value="__('Currency')" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+            <select id="currency" name="currency" class="block mt-1 w-full" required>
+                <option value="">Select Currency</option>
+                <option value="LBP">LBP</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+            </select>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <x-input-error :messages="$errors->get('currency')" class="mt-2" />
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
+        <!-- Balance -->
+        <div class="mt-4">
+            <x-input-label for="balance" :value="__('Initial Balance')" />
+
+            <x-text-input id="balance" class="block mt-1 w-full" type="number" name="balance" :value="old('balance')" required />
+
+            <x-input-error :messages="$errors->get('balance')" class="mt-2" />
         </div>
 
+        <!-- Submit Button -->
         <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
+            <x-primary-button>
+                {{ __('Create Account') }}
             </x-primary-button>
         </div>
     </form>
+
+    <!-- Generate Random Account Number Script -->
+    <script>
+        function generateAccountNumber() {
+            // Example: Generate a random 10-digit account number
+            const accountNumber = Math.floor(Math.random() * 9000000000) + 1000000000;
+            document.getElementById('account_number').value = accountNumber;
+        }
+
+        // Generate a random account number when the page loads
+        window.onload = generateAccountNumber;
+    </script>
 </x-guest-layout>

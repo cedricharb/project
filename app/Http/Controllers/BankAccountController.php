@@ -7,7 +7,7 @@ use App\Models\Account;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class AccountController extends Controller
+class BankAccountController extends Controller
 {
     /**
      * Show the form for creating a new account.
@@ -16,7 +16,6 @@ class AccountController extends Controller
      */
     public function create()
     {
-        // Assuming you have a view named 'account.create' with the account creation form
         return view('account.create');
     }
 
@@ -37,16 +36,16 @@ class AccountController extends Controller
         // Create the account
         $account = new Account([
             'user_id' => Auth::id(),
-            'account_number' => $this->generateAccountNumber(), // Implement this method to generate a unique account number
+            'account_number' => $this->generateAccountNumber(),
             'currency' => $request->currency,
-            'balance' => 0, // Assuming new accounts start with a balance of 0
-            'status' => 'pending', // Assuming new accounts have a status of 'pending' until approved
+            'balance' => $request->balance, 
+            'status' => 'pending',
         ]);
 
         $account->save();
 
         // Redirect to a route or view with a success message
-        return redirect()->route('account.index')->with('success', 'Account created successfully and pending approval.');
+        return redirect()->route('dashboard')->with('success', 'Account created successfully and pending approval.');
     }
 
     /**
@@ -78,10 +77,6 @@ class AccountController extends Controller
     {
         $account = Account::findOrFail($id);
 
-        // Authorization check to ensure the authenticated user is a banking agent
-        // This should be handled by a middleware or a policy
-        $this->authorize('approve', $account);
-
         // Assuming you have a view named 'account.approval' for the approval process
         return view('account.approval', compact('account'));
     }
@@ -97,10 +92,6 @@ class AccountController extends Controller
     {
         $account = Account::findOrFail($id);
 
-        // Authorization check to ensure the authenticated user is a banking agent
-        // This should be handled by a middleware or a policy
-        $this->authorize('approve', $account);
-
         // Validate the request data
         $request->validate([
             'status' => 'required|in:approved,disapproved',
@@ -108,13 +99,10 @@ class AccountController extends Controller
 
         // Update the account status
         $account->status = $request->status;
-        if ($request->status == 'approved') {
-            $account->approved_by_agent_id = Auth::id();
-        }
         $account->save();
 
         // Redirect to a route or view with a success message
-        return redirect()->route('agent.dashboard')->with('success', 'Account approval status updated.');
+        return redirect()->route('dashboard')->with('success', 'Account approval status updated.');
     }
 
     // Other methods related to account management can be added here

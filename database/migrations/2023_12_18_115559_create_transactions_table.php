@@ -16,7 +16,7 @@ class CreateTransactionsTable extends Migration
             $table->text('description')->nullable();
             $table->timestamps();
 
-            $table->foreign('account_id')->references('id')->on('bank_accounts')->onDelete('cascade');
+            $table->foreign('account_id')->references('id')->on('accounts')->onDelete('cascade');
         });
     }
 

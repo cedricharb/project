@@ -45,7 +45,7 @@ class HomeController extends Controller
     {
         // Retrieve data needed for the banking agent dashboard
         $pendingAccounts = Account::where('status', 'pending')->get();
-        $recentTransactions = Transaction::orderBy('transaction_date', 'desc')->take(10)->get();
+        $recentTransactions = Transaction::orderBy('created_at', 'desc')->take(10)->get();
 
         // Assuming you have a view named 'agent.dashboard' for the banking agent dashboard
         return view('agent.dashboard', compact('pendingAccounts', 'recentTransactions'));
@@ -62,7 +62,7 @@ class HomeController extends Controller
         $accounts = Account::where('user_id', Auth::id())->get();
         $recentTransactions = Transaction::whereHas('account', function ($query) {
             $query->where('user_id', Auth::id());
-        })->orderBy('transaction_date', 'desc')->take(10)->get();
+        })->orderBy('created_at', 'desc')->take(10)->get();
 
         // Assuming you have a view named 'client.dashboard' for the client dashboard
         return view('client.dashboard', compact('accounts', 'recentTransactions'));

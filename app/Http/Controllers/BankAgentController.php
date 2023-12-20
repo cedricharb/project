@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BankAgentController extends Controller
 {
@@ -17,10 +18,9 @@ class BankAgentController extends Controller
      */
     public function dashboard()
     {
-        // Assuming you have a view named 'agent.dashboard' for the banking agent dashboard
         // Retrieve data needed for the dashboard, such as pending accounts and recent transactions
         $pendingAccounts = Account::where('status', 'pending')->get();
-        $recentTransactions = Transaction::orderBy('transaction_date', 'desc')->take(10)->get();
+        $recentTransactions = Transaction::orderBy('created_at', 'desc')->take(10)->get();
 
         return view('agent.dashboard', compact('pendingAccounts', 'recentTransactions'));
     }
@@ -41,14 +41,8 @@ class BankAgentController extends Controller
 
         $account = Account::findOrFail($accountId);
 
-        // Authorization check to ensure the authenticated user is a banking agent
-        $this->authorize('approveAccount', $account);
-
         // Update the account status
-        $account->status = $request->status;
-        if ($request->status == 'approved') {
-            $account->approved_by_agent_id = Auth::id();
-        }
+        $account->status = 'approved';
         $account->save();
 
         // Redirect to a route or view with a success message
@@ -104,18 +98,66 @@ class BankAgentController extends Controller
             'account_id' => 'required|exists:accounts,id',
             'type' => 'required|in:deposit,withdrawal',
             'amount' => 'required|numeric|min:0.01',
-            // Add other validation rules as needed
         ]);
 
         // Execute the transaction logic
-        // This should be similar to the logic in the TransactionController@store method
-        // Make sure to check if the banking agent is authorized to perform this action
+        DB::transaction(function () use ($request) {
+            $account = Account::findOrFail($request->account_id);
 
-        // Redirect to a route or view with a success message
-        return redirect()->route('agent.dashboard')->with('success', 'Transaction executed successfully.');
+            // Check if it's a withdrawal and if there's enough balance
+            if ($request->type === 'withdrawal' && $account->balance < $request->amount) {
+                abort(403, 'Insufficient balance for this withdrawal.');
+            }
+
+            // Update the account balance
+            $account->balance += ($request->type === 'deposit') ? $request->amount : -$request->amount;
+            $account->save();
+
+            // Record the transaction
+            Transaction::create([
+                'account_id' => $account->id,
+                'type' => $request->type,
+                'amount' => ($request->type === 'deposit') ? $request->amount : -$request->amount,
+                'created_at' => now(),
+                'description' => $request->type . ' by bank agent',
+            ]);
+        });
+
+        return redirect()->route('dashboard')->with('success', 'Transaction executed successfully.');
     }
 
-    // Other methods related to banking agent operations can be added here
+    public function showTransactionForm()
+    {
+        $accounts = Account::all();
 
-    // Add methods for viewing and managing client transactions, etc.
+        return view('agent.transaction_form', compact('accounts'));
+    }
+
+    public function allTransactions()
+    {
+        $transactions = Transaction::with('account')->orderBy('created_at', 'desc')->get();
+
+        return view('agent.all_transactions', compact('transactions'));
+    }
+
+    public function disableAccount($accountId)
+    {
+        $account = Account::findOrFail($accountId);
+
+        // Disable the account
+        $account->status = 'disabled';
+        $account->save();
+
+        // Redirect to a route or view with a success message
+        return back()->with('success', 'Account has been disabled.');
+    }
+
+    public function allAccounts()
+    {
+        // Retrieve all accounts
+        $accounts = Account::with('user')->orderBy('user_id', 'desc')->get();
+
+        // Assuming you have a view named 'agent.all_accounts' to display all accounts
+        return view('agent.all_accounts', compact('accounts'));
+    }
 }

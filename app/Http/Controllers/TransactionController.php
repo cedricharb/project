@@ -52,6 +52,10 @@ class TransactionController extends Controller
                 abort(400, 'Insufficient balance for the transfer.');
             }
 
+            if ($fromAccount->currency != $toAccount->currency) {
+                abort(400, 'Cannot transfer between accounts with different currencies.');
+            }
+
             // Deduct the amount from the from_account
             $fromAccount->balance -= $request->amount;
             $fromAccount->save();
@@ -65,7 +69,7 @@ class TransactionController extends Controller
                 'account_id' => $fromAccount->id,
                 'type' => 'transfer',
                 'amount' => -$request->amount, // Negative because it's an outgoing transfer
-                'transaction_date' => now(),
+                'created_at' => now(),
                 'description' => 'Transfer to account ' . $toAccount->id,
             ]);
 
@@ -73,7 +77,7 @@ class TransactionController extends Controller
                 'account_id' => $toAccount->id,
                 'type' => 'transfer',
                 'amount' => $request->amount, // Positive because it's an incoming transfer
-                'transaction_date' => now(),
+                'created_at' => now(),
                 'description' => 'Transfer from account ' . $fromAccount->id,
             ]);
         });
@@ -92,7 +96,7 @@ class TransactionController extends Controller
         // Retrieve all transactions for the authenticated user's accounts
         $transactions = Transaction::whereHas('account', function ($query) {
             $query->where('user_id', Auth::id());
-        })->orderBy('transaction_date', 'desc')->get();
+        })->orderBy('created_at', 'desc')->get();
 
         // Assuming you have a view named 'transaction.history' to display transaction history
         return view('transaction.history', compact('transactions'));
