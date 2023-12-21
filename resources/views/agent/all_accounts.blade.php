@@ -51,11 +51,12 @@
                             {{ ucfirst($account->status) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <form action="{{ route('agent.account.approve', $account->id) }}" method="POST">
+                        <!-- <form action="{{ route('agent.account.approve', $account->id) }}" method="POST">
                             <button class="text-blue-600 dark:text-blue-400 hover:underline" type="submit">Approve</button>
-                        </form>
+                        </form> -->
                         <form action="{{ route('agent.disableAccount', $account->id) }}" method="POST">
-                            <button class="text-red-600 dark:text-red-400 hover:underline" type="submit">Disable</a>
+                            @csrf
+                            <button class="text-red-600 dark:text-red-400 hover:underline" type="submit">Disable</button>
                         </form>
                         </td>
                     </tr>

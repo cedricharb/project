@@ -22,9 +22,6 @@ Route::get('/', function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::middleware(['agent'])->group(function () {
-        Route::get('/agent/dashboard', [BankAgentController::class, 'dashboard'])->name('agent.dashboard');
-    });
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -34,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/account/{id}', [BankAccountController::class, 'show'])->name('account.show');
     
     Route::middleware(['agent'])->group(function () {
+        Route::get('/agent/dashboard', [BankAgentController::class, 'dashboard'])->name('agent.dashboard');
         Route::get('/account/{id}/approval', [BankAccountController::class, 'approval'])->name('account.approval');
         Route::put('/account/{id}/updateApproval', [BankAccountController::class, 'updateApproval'])->name('account.updateApproval');
         Route::get('/agent/transaction', [BankAgentController::class, 'showTransactionForm'])->name('agent.transactionForm');
