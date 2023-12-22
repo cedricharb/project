@@ -37,21 +37,6 @@ class HomeController extends Controller
     }
 
     /**
-     * Show the banking agent dashboard with relevant data.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    protected function agentDashboard()
-    {
-        // Retrieve data needed for the banking agent dashboard
-        $pendingAccounts = Account::where('status', 'pending')->get();
-        $recentTransactions = Transaction::orderBy('created_at', 'desc')->take(10)->get();
-
-        // Assuming you have a view named 'agent.dashboard' for the banking agent dashboard
-        return view('agent.dashboard', compact('pendingAccounts', 'recentTransactions'));
-    }
-
-    /**
      * Show the client dashboard with relevant data.
      *
      * @return \Illuminate\Contracts\Support\Renderable

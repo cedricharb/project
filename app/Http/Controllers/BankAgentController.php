@@ -59,7 +59,6 @@ class BankAgentController extends Controller
         // Retrieve all clients
         $clients = User::where('is_agent', false)->get(); // Assuming 'is_agent' is a boolean attribute on the User model
 
-        // Assuming you have a view named 'agent.clients' to list clients
         return view('agent.clients', compact('clients'));
     }
 
@@ -123,7 +122,7 @@ class BankAgentController extends Controller
             ]);
         });
 
-        return redirect()->route('dashboard')->with('success', 'Transaction executed successfully.');
+        return redirect()->route('agent.dashboard')->with('success', 'Transaction executed successfully.');
     }
 
     public function showTransactionForm()
@@ -157,7 +156,6 @@ class BankAgentController extends Controller
         // Retrieve all accounts
         $accounts = Account::with('user')->orderBy('user_id', 'desc')->get();
 
-        // Assuming you have a view named 'agent.all_accounts' to display all accounts
         return view('agent.all_accounts', compact('accounts'));
     }
 }

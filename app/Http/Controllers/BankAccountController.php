@@ -30,7 +30,6 @@ class BankAccountController extends Controller
         // Validate the request data
         $request->validate([
             'currency' => 'required|in:LBP,USD,EUR',
-            // Add other validation rules as needed
         ]);
 
         // Create the account
@@ -105,8 +104,6 @@ class BankAccountController extends Controller
         return redirect()->route('dashboard')->with('success', 'Account approval status updated.');
     }
 
-    // Other methods related to account management can be added here
-
     /**
      * Generate a unique account number.
      *
@@ -114,8 +111,6 @@ class BankAccountController extends Controller
      */
     private function generateAccountNumber()
     {
-        // Implement logic to generate a unique account number
-        // This is just a placeholder function
         return str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
     }
 }
